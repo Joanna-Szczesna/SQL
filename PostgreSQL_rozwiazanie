@@ -1,0 +1,113 @@
+1 Projekcja wyników zapytań(SELECT ... FROM ...)
+1.1 SELECT * FROM pracownik;
+1.2 SELECT imie  FROM pracownik;
+1.3 SELECT imie,nazwisko,dzial FROM pracownik;
+
+2 Sortowanie wyników zapytań (ORDER BY)
+2.1 SELECT imie,nazwisko,pensja FROM pracownik ORDER BY pensja;
+2.2 SELECT imie,nazwisko FROM pracownik ORDER BY nazwisko;
+2.3 SELECT nazwisko, dzial, stanowisko FROM pracownik ORDER BY dzial DESC, stanowisko;
+
+
+3.Unikatowe wyniki zapytań (DISTINCT)
+3.1  SELECT DISTINCT dzial FROM pracownik;
+3.2 SELECT DISTINCT dzial, stanowisko FROM pracownik;
+3.3 SELECT DISTINCT dzial, stanowisko FROM pracownik ORDER BY dzial DESC, stanowisko;
+
+4. Selekcja wyników zapytań (WHERE)
+4.1 SELECT * FROM pracownik WHERE imie ='JAN';
+4.2 SELECT imie, nazwisko FROM pracownik WHERE stanowisko ='SPRZEDAWCA';
+4.3 SELECT imie, nazwisko, pensja FROM pracownik WHERE pensja >1500 ORDER BY pensja DESC;
+
+5.Warunki złożone (AND, OR, NOT)
+5.1 SELECT imie, nazwisko, dzial, stanowisko FROM pracownik WHERE dzial='OBSLUGA KLIENTA' AND stanowisko ='SPRZEDAWCA';
+5.2 SELECT imie,nazwisko,dzial,stanowisko FROM pracownik WHERE dzial='techniczny' AND stanowisko='KIEROWNIK' OR stanowisko='MECHANIK';
+5.3 SELECT imie,nazwisko,dzial,stanowisko FROM pracownik WHERE dzial='techniczny' AND stanowisko='KIEROWNIK' OR stanowisko='MECHANIK';
+
+6.Predykat IN
+6.1 SELECT * FROM samochod WHERE marka IN('MERCEDES','SEAT','OPEL');
+6.2 SELECT imie, nazwisko, data_zatr FROM pracownik WHERE imie IN('ANNA','MARZENA','ALICJA');
+6.3 SELECT imie, nazwisko, miasto FROM klient WHERE MIASTO NOT IN('WARSZAWA','WROCLAW');
+
+7 Predykat LIKE
+7.1 SELECT imie, nazwisko FROM klient where nazwisko like '%K%';
+7.2SELECT imie, nazwisko FROM klient where nazwisko like 'D%SKI';
+7.3 SELECT imie, nazwisko FROM klient where nazwisko like '%K%';
+
+8 Predykat BETWEEN
+8.1 SELECT * FROM samochod where poj_silnika between 1100 AND 1600;
+8.2 SELECT * FROM pracownik WHERE data_zatr between '1997-01-01' AND '1997-12-31';
+8.3 SELECT * FROM samochod where przebieg between 10000 AND 20000 OR przebieg between 30000 AND 40000;
+
+
+9 Wartość NULL
+9.1 SELECT * FROM pracownik WHERE dodatek= IS NULL;
+9.2 SELECT * FROM klient WHERE nr_karty_kredyt IS NOT NULL;
+9.3 SELECT imie,nazwisko, COALESCE(dodatek,'0')AS DODATEK FROM pracownik;
+
+10 Kolumny wyliczeniowe (COALESCE)
+10.1SELECT imie,nazwisko,pensja, COALESCE(dodatek,0) AS dodatek, COALESCE(pensja+COALESCE(dodatek,0)) AS do_zaplaty FROM pracownik;
+10.2  SELECT imie, nazwisko,pensja, pensja*1.5 AS nowa_pensja FROM pracownik
+10.3 SELECT imie, nazwisko, 0.01* COALESCE(pensja+COALESCE(dodatek,0)) AS pewnie_podatek  FROM pracow
+
+11 Złączenia wewnętrzne dwóch tabel
+11.1 SELECT s.id, data_odd , data_wyp , marka , typ FROM wypozyczenie w INNER JOIN samochod s ON w.id_samochod= s.id WHERE w.data_odd IS NULL;
+11.2 SELECT w.id, imie, nazwisko, data_odd, data_wyp FROM wypozyczenie w INNER JOIN klient k ON k.id = w.id_klient WHERE w.data_odd IS NULL ORDER BY nazwisko,imie, w.id, data_wyp;
+11.3 SELECT imie, nazwisko, data_wyp, data_odd, kaucja FROM wypozyczenie w INNER JOIN klient k ON k.id = w.id_klient WHERE data_wyp IS NOT NULL;
+
+12 Złączenia wewnętrzne większej liczby tabel
+12.1 SELECT imie, nazwisko, marka typ FROM wypozyczenie w INNER JOIN klient k ON k.id = w.id_klient INNER JOIN samochod s ON w.id_samochod=s.id WHERE data_wyp IS NOT NULL ORDER BY k.nazwisko,k.imie, s.marka, s.typ ;
+12.2  SELECT m.ulica,m.numer, s.marka, s.typ FROM wypozyczenie w INNER JOIN klient k ON k.id = w.id_klient INNER JOIN samochod s ON w.id_samochod=s.id INNER JOIN miejsce m ON w.id_miejsca_wyp = m.id WHERE data_wyp IS NOT NULL ORDER BY m.ulica, s.marka, s.typ;
+12.3SELECT s.id, k.imie,k.nazwisko, s.marka, s.typ FROM wypozyczenie w INNER JOIN klient k ON k.id = w.id_klient INNER JOIN samochod s ON w.id_samochod=s.id  ORDER BY s.id, k.nazwisko,k.imie;
+
+13 Funkcje agregujące bez grupowania
+13.1 SELECT MAX(pensja) FROM pracownik;
+13.2 SELECT round(AVG(pensja),2) FROM pracownik;
+13.3 ELECT MIN(data_prod) FROM samochod;
+
+14 Podzapytania nieskorelowane z użyciem funkcji agregujących bez
+grupowania
+14.1 SELECT imie, nazwisko, pensja FROM pracownik WHERE pensja=(SELECT MAX(pensja) FROM pracownik );
+14.2 SELECT imie, nazwisko, pensja FROM pracownik WHERE pensja > (SELECT AVG(pensja) FROM pracownik );
+14.3 SELECT marka, typ, data_prod FROM samochod WHERE data_prod = (SELECT MIN(data_prod) FROM samochod) ;
+
+15 Podzapytania nieskorelowane z predykatem IN
+15.1 SELECT marka, typ, data_prod FROM samochod WHERE id NOT IN (SELECT id_samochod FROM wypozyczenie WHERE data_wyp IS NOT NULL);
+15.2 SELECT imie,nazwisko FROM klient WHERE id NOT IN (SELECT id_klient FROM wypozyczenie WHERE data_wyp IS NOT NULL) ORDER BY nazwisko,imie;
+15.3 SELECT imie,nazwisko FROM pracownik WHERE id NOT IN (SELECT id_pracow_wyp FROM wypozyczenie);
+
+
+16 Modyfikacja danych w bazie danych (UPDATE)
+16.1 UPDATE pracownik SET dodatek='50' WHERE dodatek IS NULL;
+16.2 UPDATE klient SET imie='JERZY', nazwisko='NOWAK' WHERE id='10';
+16.3 UPDATE pracownik SET pensja=1.1*pensja WHERE pensja < (SELECT AVG(pensja) FROM pracownik );
+
+
+17 Usuwanie danych z bazy danych (DELETE)
+17.1 DELETE FROM klient WHERE id=17;
+17.2 DELETE FROM wypozyczenie WHERE id_klient=17;
+17.3 DELETE FROM klient WHERE id NOT IN( SELECT id_klient FROM wypozyczenie WHERE data_wyp IS NOT NULL);
+
+
+18 Dodawanie danych do bazy danych (INSERT)
+Usunąć klientów, którzy nie wypożyczyli żadnego samochodu.
+18.1  INSERT INTO klient (id,imie,nazwisko,ulica,numer,kod,miasto,telefon) VALUES('21','ADAM','CICHY','KORZENNA', '12','00-950','WARSZAWA','123454321');
+18.2 INSERT INTO samochod (id,marka,kolor, poj_silnika, data_prod, przebieg,typ ) VALUES('19','SKODA','SREBRNY','1896', '01.09.2012','5000','OCTAVIA');
+18.3  INSERT INTO wypozyczenie (id,id_klient, id_samochod, id_pracow_wyp,id_miejsca_wyp, data_wyp,kaucja, cena_jedn) VALUES('26','19','21','1','2', '2012.10.28','4000','500');
+
+19 Wybrane funkcje daty i czasu (DAY, MONTH, YEAR, GETDATE,
+DATEDIFF)
+19.1 SELECT * FROM pracownik WHERE EXTRACT(MONTH FROM data_zatr)='05';
+19.2 SELECT imie, nazwisko, DATE_PART ('day', now() - data_zatr) AS dni FROM pracownik ORDER BY dni DESC;
+19.3 SELECT imie,nazwisko, marka, typ, DATE_PART('day', now() - w.data_wyp) AS ile_dni FROM wypozyczenie w LEFT JOIN samochod s ON s.id= w.id_samochod INNER JOIN klient k ON w.id_klient = k.id WHERE data_odd IS NULL AND data_wyp IS NOT NULL  ORDER BY ile_dni DESC;
+
+
+20 Wybrane funkcje operujące na napisach (LEFT, RIGHT, LEN,
+UPPER, LOWER, STUFF)
+20.1 SELECT imie,nazwisko, (LEFT(imie,1),LEFT(nazwisko,1)) AS inicjaly from klient ORDER BY inicjaly, nazwisko,imie;
+20.2 SELECT UPPER( LEFT(imie,1) )|| LOWER(SUBSTRING( imie from 2 ) ) AS imie, UPPER( LEFT(nazwisko,1) ) || LOWER(SUBSTRING( nazwisko from 2) ) AS nazwisko from klient;
+20.3  SELECT UPPER( LEFT(imie,1) )|| LOWER(SUBSTRING( imie from 2 ) ) AS imie, UPPER( LEFT(nazwisko,1) ) || LOWER(SUBSTRING( nazwisko from 2) ) AS nazwisko,overlay( nr_karty_kredyt placing'******' from 4 for 10) from klient;
+
+
+
+
